@@ -1,0 +1,361 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ---------------------------------------------------------
+    // Global Hardened Primitives
+    // ---------------------------------------------------------
+    function isValidId(id) {
+      return id is string
+        && id.size() >= 1
+        && id.size() <= 128
+        && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerifiedUser()
+        && request.auth.token.email == 'shivshankar28082008@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin()
+        || (isVerifiedUser()
+          && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function isOptionalString(data, key, maxLen) {
+      return !(key in data)
+        || (data[key] is string && data[key].size() <= maxLen);
+    }
+
+    // ---------------------------------------------------------
+    // Validation Blueprints (Synchronized with firebase-blueprint.json)
+    // ---------------------------------------------------------
+    function isValidPGListing(data) {
+      return data.keys().hasAll([
+          'id',
+          'slug',
+          'name',
+          'area',
+          'city',
+          'state',
+          'address',
+          'propertyType',
+          'genderCategory',
+          'image',
+          'featured',
+          'recentlyAdded',
+          'addedOrder',
+          'isPublished',
+          'createdByUid',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id',
+          'slug',
+          'name',
+          'area',
+          'city',
+          'state',
+          'address',
+          'propertyType',
+          'genderCategory',
+          'phone',
+          'ratingCount',
+          'website',
+          'image',
+          'featured',
+          'recentlyAdded',
+          'addedOrder',
+          'isPublished',
+          'createdByUid',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isValidId(data.id)
+        && data.slug is string
+        && data.slug.size() >= 2
+        && data.slug.size() <= 128
+        && data.slug.matches('^[a-z0-9\\-]+$')
+        && data.name is string
+        && data.name.size() >= 2
+        && data.name.size() <= 120
+        && data.area is string
+        && data.area in ['Law Gate', 'Phagwara', 'Jalandhar']
+        && data.city is string
+        && data.city in ['Phagwara', 'Jalandhar']
+        && data.state is string
+        && data.state.size() >= 2
+        && data.state.size() <= 40
+        && data.address is string
+        && data.address.size() >= 5
+        && data.address.size() <= 320
+        && data.propertyType is string
+        && data.propertyType in ['PG Accommodation', 'Hostel', 'Apartment PG', 'PG Room']
+        && data.genderCategory is string
+        && data.genderCategory in ['Boys', 'Girls', 'Co-living', 'Not Specified']
+        && isOptionalString(data, 'phone', 32)
+        && (!('ratingCount' in data) || (data.ratingCount is number && data.ratingCount >= 0 && data.ratingCount <= 100000))
+        && isOptionalString(data, 'website', 300)
+        && data.image is string
+        && data.image.size() >= 8
+        && data.image.size() <= 1000
+        && data.featured is bool
+        && data.recentlyAdded is bool
+        && data.addedOrder is number
+        && data.addedOrder >= 0
+        && data.isPublished is bool
+        && isValidId(data.createdByUid)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidEnquiry(data) {
+      return data.keys().hasAll([
+          'id',
+          'name',
+          'phone',
+          'preferredArea',
+          'message',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id',
+          'name',
+          'phone',
+          'email',
+          'preferredArea',
+          'pgId',
+          'pgName',
+          'message',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isValidId(data.id)
+        && data.name is string
+        && data.name.size() >= 2
+        && data.name.size() <= 100
+        && data.phone is string
+        && data.phone.size() >= 10
+        && data.phone.size() <= 24
+        && isOptionalString(data, 'email', 120)
+        && data.preferredArea is string
+        && data.preferredArea in ['Law Gate', 'Phagwara', 'Jalandhar']
+        && isOptionalString(data, 'pgId', 128)
+        && isOptionalString(data, 'pgName', 120)
+        && data.message is string
+        && data.message.size() >= 8
+        && data.message.size() <= 1000
+        && data.status is string
+        && data.status in ['pending', 'contacted', 'closed']
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidTourBooking(data) {
+      return data.keys().hasAll([
+          'id',
+          'name',
+          'phone',
+          'area',
+          'preferredDate',
+          'utrNumber',
+          'feeInr',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id',
+          'name',
+          'phone',
+          'area',
+          'pgName',
+          'preferredDate',
+          'utrNumber',
+          'feeInr',
+          'notes',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isValidId(data.id)
+        && data.name is string
+        && data.name.size() >= 2
+        && data.name.size() <= 100
+        && data.phone is string
+        && data.phone.size() >= 10
+        && data.phone.size() <= 24
+        && data.area is string
+        && data.area in ['Law Gate', 'Phagwara', 'Jalandhar']
+        && isOptionalString(data, 'pgName', 120)
+        && data.preferredDate is string
+        && data.preferredDate.size() >= 8
+        && data.preferredDate.size() <= 32
+        && data.utrNumber is string
+        && data.utrNumber.size() >= 6
+        && data.utrNumber.size() <= 40
+        && data.feeInr is number
+        && data.feeInr == 99
+        && isOptionalString(data, 'notes', 500)
+        && data.status is string
+        && data.status in ['pending', 'confirmed', 'completed']
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    // ---------------------------------------------------------
+    // Collection: /pg_listings/{pgId}
+    // Publicly browsable published directory; Admin-only writes
+    // ---------------------------------------------------------
+    match /pg_listings/{pgId} {
+      allow get: if isValidId(pgId) && (existing().isPublished == true || isAdmin());
+      allow list: if existing().isPublished == true || isBootstrappedAdmin();
+
+      allow create: if isSignedIn()
+        && isValidId(pgId)
+        && incoming().id == pgId
+        && incoming().createdByUid == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && isValidPGListing(incoming())
+        && isAdmin();
+
+      allow update: if isSignedIn()
+        && isValidId(pgId)
+        && isValidPGListing(incoming())
+        && incoming().id == existing().id
+        && incoming().createdByUid == existing().createdByUid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          isAdmin()
+          && incoming().diff(existing()).affectedKeys().hasOnly([
+            'slug',
+            'name',
+            'area',
+            'city',
+            'state',
+            'address',
+            'propertyType',
+            'genderCategory',
+            'phone',
+            'ratingCount',
+            'website',
+            'image',
+            'featured',
+            'recentlyAdded',
+            'addedOrder',
+            'isPublished',
+            'updatedAt'
+          ])
+        );
+
+      allow delete: if isSignedIn()
+        && isValidId(pgId)
+        && isAdmin();
+    }
+
+    // ---------------------------------------------------------
+    // Collection: /enquiries/{enquiryId}
+    // Contains PII: strictly Admin-only reads/updates/deletes
+    // ---------------------------------------------------------
+    match /enquiries/{enquiryId} {
+      allow get: if isValidId(enquiryId) && isAdmin();
+      allow list: if isBootstrappedAdmin();
+
+      allow create: if isValidId(enquiryId)
+        && incoming().id == enquiryId
+        && incoming().status == 'pending'
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && isValidEnquiry(incoming());
+
+      allow update: if isSignedIn()
+        && isValidId(enquiryId)
+        && isValidEnquiry(incoming())
+        && incoming().id == existing().id
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          isAdmin()
+          && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
+        );
+
+      allow delete: if isSignedIn()
+        && isValidId(enquiryId)
+        && isAdmin();
+    }
+
+    // ---------------------------------------------------------
+    // Collection: /tour_bookings/{bookingId}
+    // Contains PII & UTR: strictly Admin-only reads/updates/deletes
+    // ---------------------------------------------------------
+    match /tour_bookings/{bookingId} {
+      allow get: if isValidId(bookingId) && isAdmin();
+      allow list: if isBootstrappedAdmin();
+
+      allow create: if isValidId(bookingId)
+        && incoming().id == bookingId
+        && incoming().status == 'pending'
+        && incoming().feeInr == 99
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && isValidTourBooking(incoming());
+
+      allow update: if isSignedIn()
+        && isValidId(bookingId)
+        && isValidTourBooking(incoming())
+        && incoming().id == existing().id
+        && incoming().feeInr == existing().feeInr
+        && incoming().utrNumber == existing().utrNumber
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          isAdmin()
+          && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
+        );
+
+      allow delete: if isSignedIn()
+        && isValidId(bookingId)
+        && isAdmin();
+    }
+
+    // ---------------------------------------------------------
+    // Collection: /admins/{adminId}
+    // Trusted admin registry; zero client self-escalation
+    // ---------------------------------------------------------
+    match /admins/{adminId} {
+      allow get: if isSignedIn()
+        && isValidId(adminId)
+        && (request.auth.uid == adminId || isAdmin());
+      allow list: if isBootstrappedAdmin();
+      allow create, update, delete: if false;
+    }
+  }
+}

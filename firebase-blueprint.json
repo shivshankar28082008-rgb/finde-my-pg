@@ -1,0 +1,290 @@
+{
+  "entities": {
+    "PGListingDoc": {
+      "title": "PGListingDoc",
+      "description": "A verified PG, hostel, apartment PG, or PG room listing in Find My PG.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "slug": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-z0-9\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "area": {
+          "type": "string",
+          "enum": ["Law Gate", "Phagwara", "Jalandhar"]
+        },
+        "city": {
+          "type": "string",
+          "enum": ["Phagwara", "Jalandhar"]
+        },
+        "state": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "address": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 320
+        },
+        "propertyType": {
+          "type": "string",
+          "enum": ["PG Accommodation", "Hostel", "Apartment PG", "PG Room"]
+        },
+        "genderCategory": {
+          "type": "string",
+          "enum": ["Boys", "Girls", "Co-living", "Not Specified"]
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "ratingCount": {
+          "type": "number"
+        },
+        "website": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "image": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 1000
+        },
+        "featured": {
+          "type": "boolean"
+        },
+        "recentlyAdded": {
+          "type": "boolean"
+        },
+        "addedOrder": {
+          "type": "number"
+        },
+        "isPublished": {
+          "type": "boolean"
+        },
+        "createdByUid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "slug",
+        "name",
+        "area",
+        "city",
+        "state",
+        "address",
+        "propertyType",
+        "genderCategory",
+        "image",
+        "featured",
+        "recentlyAdded",
+        "addedOrder",
+        "isPublished",
+        "createdByUid",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "EnquiryDoc": {
+      "title": "EnquiryDoc",
+      "description": "Student enquiry submitted via property detail or contact forms (contains PII; readable only by admins).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "phone": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 24
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "preferredArea": {
+          "type": "string",
+          "enum": ["Law Gate", "Phagwara", "Jalandhar"]
+        },
+        "pgId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "pgName": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "message": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 1000
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "contacted", "closed"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "phone",
+        "preferredArea",
+        "message",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "TourBookingDoc": {
+      "title": "TourBookingDoc",
+      "description": "₹99 Team Tour Guide booking with UPI UTR reference (contains PII; readable only by admins).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "phone": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 24
+        },
+        "area": {
+          "type": "string",
+          "enum": ["Law Gate", "Phagwara", "Jalandhar"]
+        },
+        "pgName": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "preferredDate": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 32
+        },
+        "utrNumber": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 40
+        },
+        "feeInr": {
+          "type": "number"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "confirmed", "completed"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "phone",
+        "area",
+        "preferredDate",
+        "utrNumber",
+        "feeInr",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AdminUserDoc": {
+      "title": "AdminUserDoc",
+      "description": "Authorized administrator registry document keyed by Firebase Auth UID.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/pg_listings/{pgId}": {
+      "schema": { "$ref": "#/entities/PGListingDoc" },
+      "description": "Publicly queryable PG listings catalog; only verified administrators may create, update, or delete listings."
+    },
+    "/enquiries/{enquiryId}": {
+      "schema": { "$ref": "#/entities/EnquiryDoc" },
+      "description": "Student enquiry leads; schema-validated creation allowed, reads/updates/deletes strictly restricted to verified administrators for PII isolation."
+    },
+    "/tour_bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/TourBookingDoc" },
+      "description": "₹99 Tour Guide bookings with UPI UTR details; schema-validated creation allowed, reads/updates/deletes strictly restricted to verified administrators."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminUserDoc" },
+      "description": "Trusted admin allowlist documents; no client-side self-escalation writes permitted."
+    }
+  }
+}

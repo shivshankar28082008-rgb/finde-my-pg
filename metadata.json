@@ -1,0 +1,6 @@
+{
+  "name": "Find My PG",
+  "description": "Find Your Perfect Stay Near Your Campus. Discover verified PGs, hostels, and student accommodations near LPU Law Gate, Phagwara, and Jalandhar.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
